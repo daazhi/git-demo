@@ -30,8 +30,8 @@
     width = window.innerWidth
     height = window.innerHeight
     margin = { top: 10, right: 120, bottom: 10, left: 40 }
-    dy = width / 3
-    dx = 10
+    dy = width / 9
+    dx = 30
 
     fetch('./mock-data/d3-demo-tree.json')
         .then(resp => {
@@ -125,6 +125,9 @@
                     .attr('fill-opacity', 0)
                     .attr('stroke-opacity', 0)
                     .on('click', d => {
+                        if (d.data.value) {
+                            alert(d.data.value)
+                        }
                         d.children = d.children ? null : d._children
                         update(d)
                     })
