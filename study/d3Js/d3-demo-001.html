@@ -4,69 +4,74 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <style>
-        body {background: black}
+        /*body {background: black}*/
     </style>
 </head>
 <body>
-<p>123ewrfdnklsmdklsnfjllsan</p>
-<p>123ewrfdnklsmdklsnfjllsan</p>
-<p>123ewrfdnklsmdklsnfjllsan</p>
-<p>123ewrfdnklsmdklsnfjllsan</p>
-<p>123ewrfdnklsmdklsnfjllsan</p>
-<p>123ewrfdnklsmdklsnfjllsan</p>
-<p>123ewrfdnklsmdklsnfjllsan</p>
-<p>123ewrfdnklsmdklsnfjllsan</p>
-<p>123ewrfdnklsmdklsnfjllsan</p>
-<p>123ewrfdnklsmdklsnfjllsan</p>
-<p>123ewrfdnklsmdklsnfjllsan</p>
-<p>123ewrfdnklsmdklsnfjllsan</p>
+<svg></svg>
 </body>
 
 <script src="./v5/d3.v5.min.js"></script>
 
 <script>
-    const svg = d3.create("svg")
-        .attr("viewBox", [0, 0, 500, 300])
-        .style("font", "10px sans-serif");
 
-    const g = svg.append("g")
-        .selectAll("g")
-        .data(data.series.map(d => Object.assign({
-            clipId: DOM.uid("clip"),
-            pathId: DOM.uid("path")
-        }, d)))
-        .join("g")
-        .attr("transform", (d, i) => `translate(0,${i * (step + 1) + margin.top})`);
+    var alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
 
-    g.append("clipPath")
-        .attr("id", d => d.clipId.id)
-        .append("rect")
-        .attr("width", width)
-        .attr("height", step);
+    var svg = d3.select("svg"),
+        width = +svg.attr("width"),
+        height = +svg.attr("height"),
+        g = svg.append("g").attr("transform", "translate(32," + (height / 2) + ")");
 
-    g.append("defs").append("path")
-        .attr("id", d => d.pathId.id)
-        .attr("d", d => area(d.values));
+    function update(data) {
+        var t = d3.transition()
+            .duration(750);
 
-    g.append("g")
-        .attr("clip-path", d => d.clipId)
-        .selectAll("use")
-        .data(d => new Array(overlap).fill(d))
-        .join("use")
-        .attr("fill", (d, i) => color(i))
-        .attr("transform", (d, i) => `translate(0,${(i + 1) * step})`)
-        .attr("xlink:href", d => d.pathId.href);
+        // JOIN new data with old elements.
+        var text = g.selectAll("text")
+            .data(data, function(d) { return d; });
 
-    g.append("text")
-        .attr("x", 4)
-        .attr("y", step / 2)
-        .attr("dy", "0.35em")
-        .text(d => d.name);
+        // EXIT old elements not present in new data.
+        text.exit()
+            .attr("class", "exit")
+            .transition(t)
+            .attr("y", 60)
+            .style("fill-opacity", 1e-6)
+            .remove();
 
-    svg.append("g")
-        .call(xAxis);
+        // UPDATE old elements present in new data.
+        text.attr("class", "update")
+            .attr("y", 0)
+            .style("fill-opacity", 1)
+            .transition(t)
+            .attr("x", function(d, i) { return i * 12; });
 
-    document.body.appendChild(svg.node());
+        // ENTER new elements present in new data.
+        text.enter().append("text")
+            .attr("class", "enter")
+            .attr("dy", "1em")
+            .attr("y", 0)
+            .attr("x", function(d, i) { return i * 12; })
+            .style("fill-opacity", 1e-6)
+            .text(function(d) { return d; })
+            .transition(t)
+            .attr("y", 0)
+            .style("fill-opacity", 1);
+    }
+
+    // The initial display.
+    update(alphabet);
+
+    // Grab a random sample of letters from the alphabet, in alphabetical order.
+    let words = 'Grab a random sample of letters from the alphabet, in alphabetical order.'
+    words = words.split(' ')
+    d3.interval(function() {
+        update(d3.shuffle(alphabet)
+            .slice(0, Math.floor(Math.random() * 26))
+            .sort());
+        // update(d3.shuffle(alphabet)
+        //     .slice(0, Math.floor(Math.random() * 26))
+        //     .sort());
+    }, 1500);
 
 </script>
 
