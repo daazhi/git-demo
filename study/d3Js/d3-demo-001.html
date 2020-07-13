@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body {background: black}
+    </style>
+</head>
+<body>
+<p>123ewrfdnklsmdklsnfjllsan</p>
+<p>123ewrfdnklsmdklsnfjllsan</p>
+<p>123ewrfdnklsmdklsnfjllsan</p>
+<p>123ewrfdnklsmdklsnfjllsan</p>
+<p>123ewrfdnklsmdklsnfjllsan</p>
+<p>123ewrfdnklsmdklsnfjllsan</p>
+<p>123ewrfdnklsmdklsnfjllsan</p>
+<p>123ewrfdnklsmdklsnfjllsan</p>
+<p>123ewrfdnklsmdklsnfjllsan</p>
+<p>123ewrfdnklsmdklsnfjllsan</p>
+<p>123ewrfdnklsmdklsnfjllsan</p>
+<p>123ewrfdnklsmdklsnfjllsan</p>
+</body>
+
+<script src="./v5/d3.v5.min.js"></script>
+
+<script>
+    const svg = d3.create("svg")
+        .attr("viewBox", [0, 0, 500, 300])
+        .style("font", "10px sans-serif");
+
+    const g = svg.append("g")
+        .selectAll("g")
+        .data(data.series.map(d => Object.assign({
+            clipId: DOM.uid("clip"),
+            pathId: DOM.uid("path")
+        }, d)))
+        .join("g")
+        .attr("transform", (d, i) => `translate(0,${i * (step + 1) + margin.top})`);
+
+    g.append("clipPath")
+        .attr("id", d => d.clipId.id)
+        .append("rect")
+        .attr("width", width)
+        .attr("height", step);
+
+    g.append("defs").append("path")
+        .attr("id", d => d.pathId.id)
+        .attr("d", d => area(d.values));
+
+    g.append("g")
+        .attr("clip-path", d => d.clipId)
+        .selectAll("use")
+        .data(d => new Array(overlap).fill(d))
+        .join("use")
+        .attr("fill", (d, i) => color(i))
+        .attr("transform", (d, i) => `translate(0,${(i + 1) * step})`)
+        .attr("xlink:href", d => d.pathId.href);
+
+    g.append("text")
+        .attr("x", 4)
+        .attr("y", step / 2)
+        .attr("dy", "0.35em")
+        .text(d => d.name);
+
+    svg.append("g")
+        .call(xAxis);
+
+    document.body.appendChild(svg.node());
+
+</script>
+
+</html>
