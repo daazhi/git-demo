@@ -4,74 +4,176 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <style>
-        /*body {background: black}*/
+        .line {
+            fill: none;
+            stroke: red;
+            stroke-width: 1.5px;
+        }
     </style>
 </head>
 <body>
-<svg></svg>
+
+<svg width="600" height="400"></svg>
+
 </body>
 
 <script src="./v5/d3.v5.min.js"></script>
 
 <script>
+    var svg = d3.select("svg")
+    var margin = {top: 20, right: 50, bottom: 30, left: 50}
+    var width = +svg.attr("width") - margin.left - margin.right
+    var height = +svg.attr("height") - margin.top - margin.bottom
+    var plotgroup = svg.append("g").attr("transform", `translate(${margin.left}, ${margin.top})`);
+    var parseTime = d3.timeParse("%d-%b-%y"),
+        formatDate = d3.timeFormat("%d-%b"),
+        bisectDate = d3.bisector(function(d) { return d.date; }).left;
 
-    var alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
+    var x = d3.scaleTime().range([0, width]);
 
-    var svg = d3.select("svg"),
-        width = +svg.attr("width"),
-        height = +svg.attr("height"),
-        g = svg.append("g").attr("transform", "translate(32," + (height / 2) + ")");
+    var y = d3.scaleLinear()
+        .domain([20, 80])
+        .range([height, 0]);
 
-    function update(data) {
-        var t = d3.transition()
-            .duration(750);
+    var line = d3.line()
+        .x(d => x(d.date))
+        .y(d => y(d.high));
 
-        // JOIN new data with old elements.
-        var text = g.selectAll("text")
-            .data(data, function(d) { return d; });
+    var data = [
+        {"date": "1-Apr-18", "high": 60},
+        {"date": "2-Apr-18", "high": 43},
+        {"date": "3-Apr-18", "high": 43},
+        {"date": "4-Apr-18", "high": 56},
+        {"date": "5-Apr-18", "high": 45},
+        {"date": "6-Apr-18", "high": 62},
+        {"date": "7-Apr-18", "high": 49}
+    ];
 
-        // EXIT old elements not present in new data.
-        text.exit()
-            .attr("class", "exit")
-            .transition(t)
-            .attr("y", 60)
-            .style("fill-opacity", 1e-6)
-            .remove();
+    data.forEach(function (d) {
+        d.date = parseTime(d.date);
+    });
 
-        // UPDATE old elements present in new data.
-        text.attr("class", "update")
-            .attr("y", 0)
-            .style("fill-opacity", 1)
-            .transition(t)
-            .attr("x", function(d, i) { return i * 12; });
+    x.domain(d3.extent(data, d => d.date));
 
-        // ENTER new elements present in new data.
-        text.enter().append("text")
-            .attr("class", "enter")
-            .attr("dy", "1em")
-            .attr("y", 0)
-            .attr("x", function(d, i) { return i * 12; })
-            .style("fill-opacity", 1e-6)
-            .text(function(d) { return d; })
-            .transition(t)
-            .attr("y", 0)
-            .style("fill-opacity", 1);
+    plotgroup.append("g")
+        .attr("transform", `translate(0, ${height})`)
+        .call(d3.axisBottom(x).ticks(7));
+
+    plotgroup.append("g")
+        .attr("transform", `translate(0, 0)`)
+        .call(d3.axisTop(x).ticks(7));
+
+    plotgroup.append("g")
+        .call(d3.axisLeft(y))
+
+    plotgroup.append("g")
+        .attr("transform", `translate(${width}, 0)`)
+        .call(d3.axisRight(y))
+
+    plotgroup.append("path")
+        .datum(data)
+        .attr("class", "line")
+        .attr("fill", "none")
+        .attr("d", line);
+
+    let focus = plotgroup.append('g').style('display', 'none');
+    focus.append('line').attr('class', 'x').style('stroke', 'blue')
+        .style('stroke-dasharray', '3,3').style('opacity', 0.5)
+        .attr('y1', 0).attr('y2', height)
+    focus.append('line').attr('class', 'y').style('stroke', 'blue')
+        .style('stroke-dasharray', '3,3').style('opacity', 0.5)
+        .attr('x1', width).attr('x2', width)
+    focus.append("circle")
+        .attr("class", "y")
+        .style("fill", "none")
+        .style("stroke", "blue")
+        .attr("r", 4);
+
+    // place the value at the intersection
+    focus.append("text")
+        .attr("class", "y1")
+        .style("stroke", "white")
+        .style("stroke-width", "3.5px")
+        .style("opacity", 0.8)
+        .attr("dx", 8)
+        .attr("dy", "-.3em");
+    focus.append("text")
+        .attr("class", "y2")
+        .attr("dx", 8)
+        .attr("dy", "-.3em");
+
+    // place the date at the intersection
+    focus.append("text")
+        .attr("class", "y3")
+        .style("stroke", "white")
+        .style("stroke-width", "3.5px")
+        .style("opacity", 0.8)
+        .attr("dx", 8)
+        .attr("dy", "1em");
+    focus.append("text")
+        .attr("class", "y4")
+        .attr("dx", 8)
+        .attr("dy", "1em");
+
+    plotgroup.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .style("fill", "none")
+        .style("pointer-events", "all")
+        .on("mouseover", function() { focus.style("display", null); })
+        .on("mouseout", function() { focus.style("display", "none"); })
+        .on("mousemove", mousemove);
+
+    function mousemove() {
+        var x0 = x.invert(d3.mouse(this)[0]),
+            i = bisectDate(data, x0, 1),
+            d0 = data[i - 1],
+            d1 = data[i],
+            d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+
+        focus.select("circle.y")
+            .attr("transform",
+                "translate(" + x(d.date) + "," +
+                y(d.high) + ")");
+
+        focus.select("text.y1")
+            .attr("transform",
+                "translate(" + x(d.date) + "," +
+                y(d.high) + ")")
+            .text(d.high);
+
+        focus.select("text.y2")
+            .attr("transform",
+                "translate(" + x(d.date) + "," +
+                y(d.high) + ")")
+            .text(d.high);
+
+        focus.select("text.y3")
+            .attr("transform",
+                "translate(" + x(d.date) + "," +
+                y(d.high) + ")")
+            .text(formatDate(d.date));
+
+        focus.select("text.y4")
+            .attr("transform",
+                "translate(" + x(d.date) + "," +
+                y(d.high) + ")")
+            .text(formatDate(d.date));
+
+        focus.select(".x")
+            .attr("transform",
+                "translate(" + x(d.date) + "," +
+                y(d.high) + ")")
+            .attr("y2", height - y(d.high));
+
+        focus.select(".y")
+            .attr("transform",
+                "translate(" + width * -1 + "," +
+                y(d.high) + ")")
+            .attr("x2", width + width);
+
     }
 
-    // The initial display.
-    update(alphabet);
-
-    // Grab a random sample of letters from the alphabet, in alphabetical order.
-    let words = 'Grab a random sample of letters from the alphabet, in alphabetical order.'
-    words = words.split(' ')
-    d3.interval(function() {
-        update(d3.shuffle(alphabet)
-            .slice(0, Math.floor(Math.random() * 26))
-            .sort());
-        // update(d3.shuffle(alphabet)
-        //     .slice(0, Math.floor(Math.random() * 26))
-        //     .sort());
-    }, 1500);
 
 </script>
 
