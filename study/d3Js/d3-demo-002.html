@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .line {
+            fill: none;
+            stroke: red;
+            stroke-width: 1.5px;
+        }
+    </style>
+</head>
+<body>
+
+<ul id="list">
+    <li></li>
+    <li></li>
+</ul>
+
+<div id="app">
+</div>
+
+</body>
+
+<script src="./v5/d3.v5.min.js"></script>
+
+<script>
+    let arr = [10, 20, 30, 40]
+    d3.select('#list').selectAll('li').data(arr).text(d => d)
+        .enter().append('li').text(d => d)
+
+    d3.selectAll('li').style('color', 'red')
+
+    let removeArr = [20, 30, 40, 4]
+    d3.selectAll('li').data(removeArr).exit().remove()
+
+    let svg = d3.select('#app').append('svg').attr("width", 200)
+        .attr("height", 200);
+
+    function line({x1, y1, x2, y2, color = '#333', width = 1}) {
+        svg.append('line')
+            .attr('x1', x1).attr('y1', y1)
+            .attr('x2', x2).attr('y2', y2)
+            .style('stroke', color).style('stroke-width', width);
+    }
+
+    line({x1: 50, y1: 50, x2: 150, y2: 150})
+    line({x1: 50, y1: 50, x2: 150, y2: 50})
+    line({x1: 150, y1: 50, x2: 150, y2: 150})
+
+    svg.append('rect')
+        .attr('x', 60)
+        .attr('y', 60)
+        .attr('width', 80)
+        .attr('height', 80)
+        .attr('fill', '#aaa')
+    svg.append('circle')
+        .attr('cx', 100)
+        .attr('cy', 100)
+        .attr('r', 35)
+        .attr('fill', '#666')
+
+
+</script>
+
+</html>
