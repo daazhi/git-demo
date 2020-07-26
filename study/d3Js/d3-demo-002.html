@@ -35,8 +35,17 @@
     let removeArr = [20, 30, 40, 4]
     d3.selectAll('li').data(removeArr).exit().remove()
 
+    d3.select('li').transition().style('color', '#666').duration(2000)
+    d3.selectAll('li').transition()
+        .style('font-size', '30px').delay(3000)
+        .each("start", function() { d3.select(this).style("color", "green"); })
+        // .duration(2000)
+
+
     let svg = d3.select('#app').append('svg').attr("width", 600)
         .attr("height", 200);
+
+    svg = svg.append('g').attr('transform', 'translate(0, 0) rotate(-10)')
 
     function line({x1, y1, x2, y2, color = '#333', width = 1}) {
         svg.append('line')
