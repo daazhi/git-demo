@@ -35,7 +35,7 @@
     let removeArr = [20, 30, 40, 4]
     d3.selectAll('li').data(removeArr).exit().remove()
 
-    let svg = d3.select('#app').append('svg').attr("width", 200)
+    let svg = d3.select('#app').append('svg').attr("width", 600)
         .attr("height", 200);
 
     function line({x1, y1, x2, y2, color = '#333', width = 1}) {
@@ -60,6 +60,20 @@
         .attr('cy', 100)
         .attr('r', 35)
         .attr('fill', '#666')
+
+    svg.append("ellipse")
+        .attr("cx", 200)
+        .attr("cy", 100)
+        .attr("rx", 50)
+        .attr("ry", 80)
+        .attr("fill", "green")
+
+    line({x1: 150, y1: 0, x2: 250, y2: 0})
+    line({x1: 150, y1: 0, x2: 200, y2: 100})
+    line({x1: 200, y1: 100, x2: 250, y2: 0})
+    line({x1: 150, y1: 0, x2: 150, y2: 200})
+    line({x1: 150, y1: 200, x2: 250, y2: 200})
+    line({x1: 250, y1: 200, x2: 250, y2: 0})
 
 
 </script>
