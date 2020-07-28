@@ -36,16 +36,15 @@
     d3.selectAll('li').data(removeArr).exit().remove()
 
     d3.select('li').transition().style('color', '#666').duration(2000)
-    d3.selectAll('li').transition()
-        .style('font-size', '30px').delay(3000)
-        .each("start", function() { d3.select(this).style("color", "green"); })
-        // .duration(2000)
+    d3.select('li').transition()
+        .style('margin-left', '30px').delay(3000)
+        .duration(2000)
 
 
     let svg = d3.select('#app').append('svg').attr("width", 600)
         .attr("height", 200);
 
-    svg = svg.append('g').attr('transform', 'translate(0, 0) rotate(-10)')
+    svg = svg.append('g').attr('transform', 'translate(0, 0) rotate(0)')
 
     function line({x1, y1, x2, y2, color = '#333', width = 1}) {
         svg.append('line')
@@ -85,6 +84,57 @@
     line({x1: 250, y1: 200, x2: 250, y2: 0})
 
 
+    function circ() {
+        var width = 400;
+
+        var height = 400;
+
+        var data = [10, 20, 30];
+
+        var colors = ['green', 'purple', 'yellow'];
+
+        var svg = d3
+            .select("body")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        var g = svg.selectAll("g")
+            .data(data)
+            .enter()
+            .append("g")
+            .attr("transform", function(d, i) {
+                return "translate(0,0)";
+            })
+
+        g.append("circle").attr("cx", function(d, i) {
+            return i*75 + 50;
+        })
+
+            .attr("cy", function(d, i) {
+                return 75;
+            })
+
+            .attr("r", function(d) {
+                return d*1.5;
+            })
+
+            .attr("fill", function(d, i){
+                return colors[i];
+            })
+
+        g.append("text").attr("x", function(d, i) {
+            return i * 75 + 25;
+        })
+
+            .attr("y", 80)
+            .attr("stroke", "teal")
+            .attr("font-size", "10px")
+            .attr("font-family", "sans-serif").text(function(d) {
+            return d;
+        });
+    }
+    circ()
 </script>
 
 </html>
