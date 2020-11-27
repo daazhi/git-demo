@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<input id="inp"/>
+<button onclick="send()">send</button>
+<div id="mess"></div>
+</body>
+</html>
+
+<script>
+    var mess = document.getElementById("mess");
+    var inp = document.getElementById("inp");
+    var ws = null;
+    if(window.WebSocket){
+        ws = new WebSocket('ws://10.21.16.11:8001');
+
+        ws.onopen = function(e){
+            console.log("连接服务器成功");
+            ws.send("game2");
+        }
+        ws.onclose = function(e){
+            console.log("服务器关闭");
+        }
+        ws.onerror = function(){
+            console.log("连接出错");
+        }
+
+        ws.onmessage = function(e){
+            let time = new Date();
+            mess.innerHTML += formatDate(time) + "的消息：" + e.data + "<br>"
+        }
+    }
+
+    function send() {
+        let text = inp.value.trim();
+        if (ws && text) {
+            ws.send(text);
+        }
+    }
+
+    function formatDate(date) {
+        if (!date) {
+            return ''
+        }
+        date = new Date(date)
+        let year = date.getFullYear()
+        let month = String(date.getMonth() + 1).padStart(2, '0')
+        let day = String(date.getDate()).padStart(2, '0')
+        let hour = String(date.getHours()).padStart(2, '0')
+        let minute = String(date.getMinutes()).padStart(2, '0')
+        let second = String(date.getSeconds()).padStart(2, '0')
+        return `${year}-${month}-${day} ${hour}:${minute}:${second}`
+    },
+
+</script>
