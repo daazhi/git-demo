@@ -7,7 +7,6 @@ let connections = {}, users = {};
 let server = ws.createServer(function (conn) {
     conn.on("text", function (str) {
         str = JSON.parse(str);
-        console.log(str)
         let data = {
             time: now()
         };
